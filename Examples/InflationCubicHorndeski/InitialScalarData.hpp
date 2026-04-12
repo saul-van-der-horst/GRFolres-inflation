@@ -8,9 +8,7 @@
 
 #include "Cell.hpp"
 #include "Coordinates.hpp"
-#include "EMTensor.hpp" //< To compute matter quantit
-#include "MatterCCZ4RHS.hpp"
-#include "ScalarField.hpp"
+#include "ModifiedCCZ4RHS.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total no. components
 #include "VarsTools.hpp"
