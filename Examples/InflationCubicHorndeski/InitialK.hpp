@@ -6,64 +6,71 @@
 #ifndef INITIALK_HPP
 #define INITIALK_HPP
 
-#include "CCZ4Geometry.hpp"
 #include "Cell.hpp"
+#include "Coordinates.hpp"            // needed for coords
 #include "DimensionDefinitions.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "Interval.H"
-#include "MatterCCZ4.hpp"
+#include "ModifiedCCZ4RHS.hpp"
 #include "simd.hpp"
 
-//! Calculates the EM tensor and then saves the ones specified in the
-//! constructor on the grid
-template <class matter_t> class InitialK
+
+
+template <class theory_t> class InitialK
 {
   public:
+    
     template <class data_t>
-    using Vars = typename MatterCCZ4<matter_t>::template Vars<data_t>;
+    using Vars = typename ModifiedCCZ4RHS<theory_t>::template Vars<data_t>;
+
+    /
+    template <class data_t>
+    using Diff2Vars =
+        typename ModifiedCCZ4RHS<theory_t>::template Diff2Vars<data_t>;
 
     //! Constructor
-    InitialK(const matter_t &a_matter, const double dx, double G_Newton = 1.0,
-             const int a_c_rho = -1, const Interval a_c_Si = Interval(),
-             const Interval a_c_Sij = Interval());
+    InitialK(const theory_t &a_theory, const double dx,
+             const std::array<double, CH_SPACEDIM> &a_center,
+             double G_Newton = 1.0);
 
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
   protected:
-    const matter_t &m_matter;
+    const theory_t &m_theory;          // consistent naming throughout
     FourthOrderDerivatives m_deriv;
-    const int m_c_rho;      // var enum for the energy density
-    const Interval m_c_Si;  // Interval of var enums for the momentum density
-    const Interval m_c_Sij; // Interval of var enums for the spatial
-                            // stress-energy density
-    double m_G_Newton;      //!< Newton's constant, set to one by default.
+    const std::array<double, CH_SPACEDIM> m_center; // needed for Coordinates
+    double m_G_Newton;
 };
 
-template <class matter_t>
-InitialK<matter_t>::InitialK(const matter_t &a_matter, const double dx,
-                             double G_Newton, const int a_c_rho,
-                             const Interval a_c_Si, const Interval a_c_Sij)
-    : m_matter(a_matter), m_deriv(dx), m_G_Newton(G_Newton), m_c_rho(a_c_rho),
-      m_c_Si(a_c_Si), m_c_Sij(a_c_Sij)
+template <class theory_t>
+InitialK<theory_t>::InitialK(const theory_t &a_theory, const double dx,
+                              const std::array<double, CH_SPACEDIM> &a_center,
+                              double G_Newton)
+    : m_theory(a_theory), m_deriv(dx), m_center(a_center),
+      m_G_Newton(G_Newton)
 {
 }
 
-template <class matter_t>
+template <class theory_t>
 template <class data_t>
-void InitialK<matter_t>::compute(Cell<data_t> current_cell) const
+void InitialK<theory_t>::compute(Cell<data_t> current_cell) const
 {
+    
     const auto vars = current_cell.template load_vars<Vars>();
-    const auto d1 = m_deriv.template diff1<Vars>(current_cell);
+    const auto d1   = m_deriv.template diff1<Vars>(current_cell);
 
-    using namespace TensorAlgebra;
+    
+    const auto d2   = m_deriv.template diff2<Diff2Vars>(current_cell);
 
-    const auto h_UU = compute_inverse_sym(vars.h);
-    const auto chris = compute_christoffel(d1.h, h_UU);
+    
+    Coordinates<data_t> coords(current_cell, m_deriv.m_dx, m_center);
 
-    const auto emtensor = m_matter.compute_emtensor(vars, d1, h_UU, chris.ULL);
+    
+    const auto rho_and_Si =
+        m_theory.compute_rho_and_Si(vars, d1, d2, coords);
 
-    // Calculate and set K
-    data_t K = -sqrt(24 * M_PI * m_G_Newton * emtensor.rho);
+    
+    data_t K = -sqrt(24.0 * M_PI * m_G_Newton * rho_and_Si.rho);
     current_cell.store_vars(K, c_K);
 }
 
