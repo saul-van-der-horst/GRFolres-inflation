@@ -1,39 +1,90 @@
-/* GRChombo
- * Copyright 2012 The GRChombo collaboration.
- * Please refer to LICENSE in GRChombo's root directory.
- */
 
-#ifndef POTENTIAL_HPP_
-#define POTENTIAL_HPP_
+#ifndef COUPLINGANDPOTENTIAL_HPP_
+#define COUPLINGANDPOTENTIAL_HPP_
 
-#include "simd.hpp"
-
-class Potential
+class CouplingAndPotential
 {
   public:
     struct params_t
     {
-        double scalar_mass;
+        // 'mutable' - mass can be changed even if object is constant
+        // this is useful to set it to 0 (temporarily)
+        mutable double scalar_mass;
+        double g3;
+        double g2;
     };
 
-  private:
     params_t m_params;
 
-  public:
-    //! The constructor
-    Potential(params_t a_params) : m_params(a_params) {}
-
-    //! Set the potential function for the scalar field here
-    template <class data_t, template <typename> class vars_t>
-    void compute_potential(data_t &V_of_phi, data_t &dVdphi,
-                           const vars_t<data_t> &vars) const
+    template <class data_t>
+    ALWAYS_INLINE data_t V(const data_t phi, const data_t X) const
     {
-        // The potential value at phi
-        V_of_phi = 0.5 * pow(m_params.scalar_mass * vars.phi, 2.0);
+        return 0.5 * pow(m_params.scalar_mass * phi, 2.);
+    } // V
+    template <class data_t>
+    ALWAYS_INLINE data_t G2(const data_t phi, const data_t X) const
+    {
+        return m_params.g2 * X * X;
+    } // G2
+    template <class data_t>
+    ALWAYS_INLINE data_t dV_dphi(const data_t phi, const data_t X) const
+    {
+        return m_params.scalar_mass * m_params.scalar_mass * phi;
+    } // dV_dphi
+    template <class data_t>
+    ALWAYS_INLINE data_t dG2_dphi(const data_t phi, const data_t X) const
+    {
+        return 0.;
+    } // dG2_dphi
+    template <class data_t>
+    ALWAYS_INLINE data_t dG2_dX(const data_t phi, const data_t X) const
+    {
+        return 2. * m_params.g2 * X;
+    } // dG2_dX
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G2_dXX(const data_t phi, const data_t X) const
+    {
+        return 2. * m_params.g2;
+    } // d2G2_dXX
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G2_dXphi(const data_t phi, const data_t X) const
+    {
+        return 0.;
+    } // d2G2_dXphi
 
-        // The potential gradient at phi
-        dVdphi = pow(m_params.scalar_mass, 2.0) * vars.phi;
-    }
+    template <class data_t>
+    ALWAYS_INLINE data_t G3(const data_t phi, const data_t X) const
+    {
+        return m_params.g3 * X;
+    } // G3
+    template <class data_t>
+    ALWAYS_INLINE data_t dG3_dphi(const data_t phi, const data_t X) const
+    {
+        return 0.;
+    } // dG3_dphi
+    template <class data_t>
+    ALWAYS_INLINE data_t dG3_dX(const data_t phi, const data_t X) const
+    {
+        return m_params.g3;
+    } // dG3_dX
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G3_dXX(const data_t phi, const data_t X) const
+    {
+        return 0.;
+    } // d2G3_dXX
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G3_dXphi(const data_t phi, const data_t X) const
+    {
+        return 0.;
+    } // d2G3_dXphi
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G3_dphiphi(const data_t phi, const data_t X) const
+    {
+        return 0.;
+    } // d2G3_dphiphi
+
+    //! The constructor
+    CouplingAndPotential(params_t a_params) : m_params(a_params) {}
 };
 
-#endif /* POTENTIAL_HPP_ */
+#endif /* COUPLINGANDPOTENTIAL_HPP_ */
