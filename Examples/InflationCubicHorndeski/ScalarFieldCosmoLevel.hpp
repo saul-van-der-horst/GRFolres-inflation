@@ -10,8 +10,8 @@
 #include "DefaultLevelFactory.hpp"
 #include "GRAMRLevel.hpp"
 // Problem specific includes
-#include "Potential.hpp"
-#include "ScalarField.hpp"
+#include "CouplingAndPotential.hpp"
+#include "CubicHorndeski.hpp"
 
 //!  A class for the evolution of a scalar field in cosmological spacetime
 /*!
