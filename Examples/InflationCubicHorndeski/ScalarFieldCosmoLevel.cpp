@@ -250,6 +250,89 @@ void CosmoLevel::specificPostTimeStep()
     }
 }
    
+void CosmoLevel::postRestart()
+{
+    // only want to do this on the first restart and also every restart
+    if (m_time == 0.0)
+    {
+        fillAllGhosts();
+        CouplingAndPotential coupling_and_potential(m_p.coupling_and_potential_params);
+        CubicHorndeskiWithCouplingAndPotential cubic_horndeski(coupling_and_potential);
+
+        // Calculate constraints and some diagnostics as we need it in tagging
+        // criterion
+        BoxLoops::loop(ModifiedGravityConstraints<CubicHorndeskiWithCouplingAndPotential>(
+                cubic_horndeski, m_dx, m_p.center, m_p.G_Newton, c_Ham,
+                Interval(c_Mom1, c_Mom3), c_Ham_abs_sum,
+                Interval(c_Mom_abs_sum, c_Mom_abs_sum)),
+            m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+        CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential> cosmo_diagnostics(
+            cubic_horndeski, m_dx, m_p.G_Newton);
+        BoxLoops::loop(cosmo_diagnostics, m_state_new, m_state_diagnostics,
+                       EXCLUDE_GHOST_CELLS);
+
+        pout() << "Setting K mean on restart at t = " << m_time << " on level "
+               << m_level << endl;
+
+        // AMRReductions for diagnostic variables
+        AMRReductions<VariableType::diagnostic> amr_reductions_diagnostic(
+            m_cosmo_amr);
+        double phys_vol = amr_reductions_diagnostic.sum(c_sqrt_gamma);
+        double K_total = amr_reductions_diagnostic.sum(c_K_scaled);
+
+        // Set rho_mean
+        m_cosmo_amr.set_rho_mean(amr_reductions_diagnostic.sum(c_rho_scaled) /
+                                 phys_vol);
+        pout() << "Set rho_mean = " << m_cosmo_amr.get_rho_mean()
+               << " at t = " << m_time << " on initial data at level "
+               << m_level << endl;
+        m_cosmo_amr.set_S_mean(amr_reductions_diagnostic.sum(c_S_scaled) /
+                               phys_vol);
+        // Set K_mean
+        m_cosmo_amr.set_K_mean(K_total / phys_vol);
+        pout() << "Calculated K mean as " << m_cosmo_amr.get_K_mean()
+               << " at t = " << m_time << " on restart at level " << m_level
+               << endl;
+
+        // Use AMR Interpolator and do lineout data extraction
+        // pass the boundary params so that we can use symmetries
+        AMRInterpolator<Lagrange<2>> interpolator(m_cosmo_amr, m_p.origin,
+                                                  m_p.dx, m_p.boundary_params,
+                                                  m_p.verbosity);
+
+        // this should fill all ghosts including the boundary ones according
+        // to the conditions set in params.txt
+        interpolator.refresh();
+
+        // restart works from level 0 to highest level, so want this to happen
+        // last on finest level
+        int write_out_level = m_p.max_level;
+        if (m_level == write_out_level)
+        {
+            // AMRReductions for diagnostic variables
+            AMRReductions<VariableType::diagnostic> amr_reductions_diagnostic(
+                m_gr_amr);
+            double L2_Ham = amr_reductions_diagnostic.norm(c_Ham);
+            double L2_Mom = amr_reductions_diagnostic.norm(Interval(c_Mom1, c_Mom3));
+
+            // only on rank zero write out the result
+            if (procID() == 0)
+            {
+                pout()
+                    << "The initial norm of the constraint vars on restart is "
+                    << L2_Ham << " for the Hamiltonian constraint and "
+                    << L2_Mom << " for the momentum constraints" << endl;
+            }
+
+            // set up the query and execute it
+            int num_points = 3 * m_p.ivN[0];
+            ConstraintsExtraction constraints_extraction(
+                c_Ham, Interval(c_Mom1, c_Mom3), num_points, m_p.L, m_p.center, m_dt, m_time);
+            constraints_extraction.execute_query(
+                &interpolator, m_p.data_path + "constraints_lineout");
+        }
+    }
+}
 
 #ifdef CH_USE_HDF5
 // Things to do before a plot level - need to calculate the Wyl scalars
