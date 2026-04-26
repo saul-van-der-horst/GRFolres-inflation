@@ -9,6 +9,7 @@
 #include "BoxLoops.hpp"
 #include "CosmoHamTaggingCriterion.hpp"
 #include "Coordinates.hpp"
+#include "FourthOrderDerivatives.hpp"
 #include "ComputePack.hpp"
 #include "InitialScalarData.hpp"
 #include "ModifiedCCZ4RHS.hpp"
