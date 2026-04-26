@@ -37,7 +37,7 @@ namespace DiagnosticVariables
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "Ham",      "Mom1",     "Mom2",
     "Mom3",
-    "Ham_abs",    "Mom_abs1","Mom_abs2","Mom_abs3",  "rho",     "sqrt_gamma",
+    "Ham_abs",    "Mom_abs1","Mom_abs2","Mom_abs3", "sqrt_gamma",
     "rho_scaled", "S_scaled", "K_scaled",
     
 
