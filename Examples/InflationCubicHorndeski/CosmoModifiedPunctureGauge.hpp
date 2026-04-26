@@ -7,7 +7,7 @@
 #define COSMOMODIFIEDPUNCTUREGAUGE_HPP_
 
 #include "DimensionDefinitions.hpp"
-#include "MovingPunctureGauge.hpp"
+#include "ModifiedPunctureGauge.hpp"
 #include "Tensor.hpp"
 
 /// This is an example of a gauge class that can be used in the CCZ4RHS compute
@@ -73,7 +73,13 @@ class CosmoMovingPunctureGauge
             rhs.B[i] =0;
         }
     }
-
+    template <class data_t, template <typename> class coords_t>
+    inline void compute_a_and_b(data_t &a_of_x, data_t &b_of_x,
+                                const coords_t<data_t> &coords) const
+    {
+        a_of_x = m_params.a0;
+        b_of_x = m_params.b0;
+    }
     
 
     void set_K_mean(double a_K_mean) { m_K_mean = a_K_mean; }
