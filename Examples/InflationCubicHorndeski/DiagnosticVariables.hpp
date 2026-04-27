@@ -28,7 +28,9 @@ enum
     c_rho_g2,
     c_rho_g3,
     c_rho_GB,
-
+    c_Si1,
+    C_Si2,
+    c_Si3,
     NUM_DIAGNOSTIC_VARS
 };
 
@@ -42,7 +44,8 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     
 
     "rho_phi",  "rho_g2",   "rho_g3",
-    "rho_GB"
+    "rho_GB",   "c_Si1",    "c_Si2,
+    "c_Si3"
 
     };
 }
