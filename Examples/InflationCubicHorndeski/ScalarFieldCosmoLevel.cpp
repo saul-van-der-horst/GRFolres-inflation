@@ -54,11 +54,7 @@ void CosmoLevel::initialData()
     // Set initial condition of inflaton, see details in Potential.hpp and
     // InitialScalarData.hpp
     double my_scalar_mass = m_p.potential_params.scalar_mass;
-    BoxLoops::loop(make_compute_pack(SetValue(0.),
-                                     InitialScalarData(m_p.initial_params, m_dx,
-                                                       my_scalar_mass)),
-                   m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
-
+   
     fillAllGhosts();
     // Note that the GammaCaluculator is not necessary since the data is
     // conformally flat. It is left here for generality.
@@ -68,9 +64,7 @@ void CosmoLevel::initialData()
     // Set initial K = -sqrt(24 pi <rho>)
     CouplingAndPotential coupling_and_potential(m_p.coupling_and_potential_params);
     CubicHorndeskiWithCouplingAndPotential cubic_horndeski(coupling_and_potential);
-    InitialK<CubicHorndeskiWithCouplingAndPotential> my_initial_K(cubic_horndeski, m_dx, m_p.G_Newton);
-    BoxLoops::loop(my_initial_K, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
-
+    
     // Calculate constraints and some diagnostics as we need it in tagging
     // criterion
    BoxLoops::loop(
@@ -83,10 +77,7 @@ void CosmoLevel::initialData()
         cubic_horndeski, m_dx, m_p.G_Newton);
     BoxLoops::loop(cosmo_diagnostics, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
-    // Assign initial rho_mean here
-    InitialScalarData initial_scalar_data(m_p.initial_params, m_dx,
-                                          my_scalar_mass);
-    m_cosmo_amr.set_rho_mean(initial_scalar_data.compute_initial_rho_mean());
+    
 }
 
 // Calculate RHS during RK4 substeps
