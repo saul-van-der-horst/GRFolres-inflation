@@ -11,7 +11,7 @@
 #include "Coordinates.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "ComputePack.hpp"
-#include "InitialScalarData.hpp"
+
 #include "ModifiedCCZ4RHS.hpp"
 #include "ModifiedGravityConstraints.hpp"
 #include "ModifiedGravityWeyl4.hpp"
@@ -27,7 +27,7 @@
 #include "CubicHorndeski.hpp"
 #include "GammaCalculator.hpp"
 #include "CouplingAndPotential.hpp"
-#include "InitialK.hpp"
+
 #include "CosmoModifiedPunctureGauge.hpp"
 // Things to do during the advance step after RK4 steps
 void CosmoLevel::specificAdvance()
