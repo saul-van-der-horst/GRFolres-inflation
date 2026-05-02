@@ -60,11 +60,11 @@ class CubicHorndeski
         Tensor<1, data_t> tau_ij_dot_dphi;
         data_t tau_ij_dot_dphi2;
     };
-
-    CubicHorndeski(const coupling_and_potential_t a_coupling_and_potential)
-        : my_coupling_and_potential(a_coupling_and_potential)
-    {
-    }
+     CubicHorndeski(const ICouplingAndPotential* a_coupling_and_potential)
+    : my_coupling_and_potential(a_coupling_and_potential)
+     {
+     }
+    
 
     template <class data_t> struct Vars
     {
@@ -169,7 +169,7 @@ class CubicHorndeski
         const; //!< the value of the coordinates
 
   protected:
-    coupling_and_potential_t my_coupling_and_potential;
+    const ICouplingAndPotential* my_coupling_and_potential;
 };
 
 #include "CubicHorndeski.impl.hpp"
