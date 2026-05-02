@@ -11,7 +11,7 @@
 #define COSMODIAGNOSTICS_IMPL_HPP_
 #include "DimensionDefinitions.hpp"
 
-template <class matter_t>
+template <class theory_t>
 template <class data_t>
 void CosmoDiagnostics<matter_t>::compute(Cell<data_t> current_cell) const
 {
