@@ -1,0 +1,212 @@
+# See the wiki page for an explanation of the params!
+# https://github.com/GRChombo/GRChombo/wiki/Guide-to-parameters
+# and a guide to this specific example at
+# https://github.com/GRChombo/GRChombo/wiki/Running-the-BBH-example
+
+#################################################
+# Filesystem parameters
+
+verbosity = 0
+
+# location / naming of output files
+# output_path = "" # Main path for all files. Must exist!
+chk_prefix = KGBInflationChk_
+plot_prefix = KGBInflationPlot_
+
+# restart_file = hdf5/KGBInflationChk_000000.3d.hdf5
+
+# HDF5 files are written every dt = L/N*dt_multiplier*checkpoint_interval
+checkpoint_interval = 1000
+# set to 0 to turn off plot files (except at t=0 and t=stop_time)
+# set to -1 to never ever print plotfiles
+plot_interval = 500
+num_plot_vars = 7
+plot_vars = chi phi rho_scaled S_scaled K_scaled Ham Mom
+
+hdf5_subpath = "hdf5"
+pout_subpath = "pout"
+data_subpath = "data"
+
+# pout_prefix = "pout"
+print_progress_only_to_rank_0 = 1
+
+# ignore_checkpoint_name_mismatch = 0
+# write_plot_ghosts = 0
+
+#################################################
+# Initial Data parameters
+
+# Change the gravitational constant of the Universe!
+# Default is 1.0, for standard geometric units
+G_Newton = 1.0
+
+# Scalar field initial data
+# Tune scalar_mass to satisfy constraints initially (2*n*Pi/L for periodic box)
+# e.g. for L=1, n=1: scalar_mass = 6.28318530718
+scalar_amplitude = 0.00777635       # PLACEHOLDER -- adjust for your KGB model
+scalar_mass      = 6.28318530718    # PLACEHOLDER -- 2*pi/L for L=1, n=1
+
+# Lineout params
+lineout_num_points = 10
+
+#################################################
+# Grid parameters
+
+# N: number of subdivisions per direction; L: physical side length
+# dx_coarsest = L/N
+N_full = 128
+L_full = 1
+
+# No AMR for homogeneous inflation runs (pure FRW background + perturbations)
+# Increase max_level if you need to resolve structure (e.g. PBH formation)
+max_level = 0
+
+# Regridding (all off for max_level = 0; uncomment and tune if you add levels)
+# Level Regridding: 0    1    2    3    4    5
+regrid_interval   = 10   0    0    0    0    0
+regrid_threshold  = 1e6
+
+max_box_size = 16
+min_box_size = 16
+
+# tag_buffer_size = 0
+# grid_buffer_size = 8
+# fill_ratio = 0.7
+# num_ghosts = 3
+
+#################################################
+# Boundary Conditions parameters
+
+# Fully periodic -- appropriate for inflation / cosmological simulations
+isPeriodic = 1 1 1
+
+# Parity assignments (used if you ever switch to reflective BCs)
+# 0 = even; 1,2,3 = odd x,y,z; 4,5,6 = odd xy,yz,xz; 7 = odd xyz
+vars_parity            = 0 0 4 6 0 5 0    #chi and hij
+                         0 0 4 6 0 5 0    #K and Aij
+                         0 1 2 3          #Theta and Gamma
+                         0 1 2 3 1 2 3    #lapse shift and B
+                         0 0              #phi and Pi
+vars_parity_diagnostic = 0 1 2 3          #Ham and Mom
+
+# Sommerfeld asymptotic values (unused with periodic BCs, kept for reference)
+num_nonzero_asymptotic_vars = 5
+nonzero_asymptotic_vars     = chi h11 h22 h33 lapse
+nonzero_asymptotic_values   = 1.0 1.0 1.0 1.0 1.0
+
+# Extrapolating BC settings (unused with periodic BCs)
+extrapolation_order    = 1
+num_extrapolating_vars = 2
+extrapolating_vars     = phi Pi
+
+#################################################
+# Evolution parameters
+
+# dt = dx * dt_multiplier on each grid level
+dt_multiplier = 0.25
+stop_time     = 100.0
+# max_steps   = 4
+
+# Spatial derivative order
+max_spatial_derivative_order = 4 # 4th order standard for cosmology; 6 requires extra stencils
+
+nan_check = 1
+
+# Lapse evolution (1+log slicing)
+lapse_advec_coeff = 1.0
+lapse_coeff       = 2.0
+lapse_power       = 1.0
+
+# Shift evolution (Gamma-driver)
+shift_advec_coeff = 0.0   # Usually no advection for beta
+shift_Gamma_coeff = 0.75
+eta               = 1.0   # eta of gamma driver, should be of order ~1/M_ADM of spacetime
+
+# CCZ4 parameters
+kappa1       = 1.0
+kappa2       = -0.1
+kappa3       = 1.0
+covariantZ4  = 1    # 0: keep kappa1; 1 [default]: replace kappa1 -> kappa1/lapse
+
+model_name = kgb-exph
+scalar_mass = 6e-6
+g2 = 0.1
+g3 = 10.0
+rbs_g3 = 0.1
+rbs_Lambda = 3e-3
+nu = 0.8165
+usr_v0 =1e-10
+usr_y1 =5.0
+y1 = 10.0
+y2 =1e-14                        
+ga3_scalar_mass =1e-2
+mu = 10.0
+exph_lambda =
+v = 10.0
+q = 1.0
+dbin_lambda1 = 1e-4
+dbin_Lambda = 2e-3
+f = 0
+v0 = 1e-10
+b = 0.5
+gamma = 2.0
+eps = 1e-12
+
+
+# Modified CCZ4 parameters
+a0 = 0.0    # PLACEHOLDER
+b0 = 0.0    # PLACEHOLDER
+
+# coefficient for KO numerical dissipation
+sigma = 0.3  # 0.3 is standard for cosmological runs; increase to ~1.0 for strong-field
+
+
+min_chi   = 1.e-50
+min_lapse = 1.e-50
+
+calculate_constraint_norms = 1
+
+#################################################
+# Apparent Horizon Finder parameters
+# (disabled for now; re-enable if studying PBH formation)
+
+AH_activate        = 0
+AH_num_ranks       = 20
+AH_num_points_u    = 30
+AH_num_points_v    = 50
+AH_solve_interval  = 1
+AH_print_interval  = 1
+AH_track_center    = false
+# AH_start_time    = 0.0
+# AH_give_up_time  = -1.   # -1 to never give up
+# AH_max_fails_after_lost = 0
+
+#################################################
+# Extraction parameters
+# (Weyl4 and scalar field extraction on spherical shells)
+
+activate_extraction      = 1
+num_extraction_radii     = 2
+extraction_radii         = 0.1 0.4    
+extraction_levels        = 0 0
+num_points_phi           = 32
+num_points_theta         = 48
+num_modes                = 4
+modes = 2 0               # l m for spherical harmonics
+        2 1
+        2 2
+        0 0               # monopole -- useful for tracking background inflation
+
+activate_scalar_extraction    = 1
+scalar_num_extraction_radii   = 2
+scalar_extraction_radii       = 0.1 0.4
+scalar_extraction_levels      = 0 0
+scalar_num_points_phi         = 32
+scalar_num_points_theta       = 48
+scalar_num_modes              = 4
+scalar_modes = 2 0
+               2 1
+               2 2
+               0 0
+
+#################################################
