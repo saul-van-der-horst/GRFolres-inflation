@@ -26,7 +26,7 @@ class CosmoDiagnostics // public MatterConstraints<matter_t>
   public:
     // Inherit the variable definitions from CCZ4 + matter_t
     template <class data_t>
-    using TheoyVars = typename theory_t::template Vars<data_t>;
+    using TheoryVars = typename theory_t::template Vars<data_t>;
 
     template <class data_t>
     using TheoryVars = typename theory_t::template Vars<data_t>;
@@ -56,7 +56,7 @@ class CosmoDiagnostics // public MatterConstraints<matter_t>
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
   protected:
-    theory_t m_ytheory; //!< The matter object, e.g. a scalar field
+    theory_t m_theory; //!< The matter object, e.g. a scalar field
     const std::array<double, CH_SPACEDIM> m_center;
     const FourthOrderDerivatives m_deriv;
 };
