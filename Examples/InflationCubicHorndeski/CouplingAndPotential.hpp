@@ -286,15 +286,15 @@ class KGBExponential_hilltop : public KGB<KGBExponential_hilltop>
 
     template <class data_t>
     ALWAYS_INLINE data_t G3_impl(const data_t phi, const data_t X) const
-    { return this->m_params.y1 * exp(this->m_params.q * X /(1. +abs(X) * abs(this->m_params.q))); }
+    { return this->m_params.y1 * exp(this->m_params.q * X /(1. + sqrt( X * X + this->m_params.eps * this->m_params.eps) * abs(this->m_params.q))); }
 
     template <class data_t>
     ALWAYS_INLINE data_t dG3_dX_impl(const data_t phi, const data_t X) const
-    { return this->m_params.y1 * this->m_params.q * exp(this->m_params.q * X/(1+abs(X) * abs(this->m_params.q))) / pow(1+ abs(X) * abs(this->m_params.q),2); }
+    { return this->m_params.y1 * this->m_params.q * ( this->m_params.q * this->m_params.eps *this->m_params.eps + sqrt(this->m_params.eps *this->m_params.eps + X * X)) * exp(this->m_params.q * X/(1+ sqrt( X * X + this->m_params.eps * this->m_params.eps) * abs(this->m_params.q))) /( pow(1+ sqrt( X * X + this->m_params.eps * this->m_params.eps) * abs(this->m_params.q),2) * sqrt(X * X + this->m_params.eps * this->m_params.eps)) ; }
 
     template <class data_t>
     ALWAYS_INLINE data_t d2G3_dXX_impl(const data_t phi, const data_t X) const
-    { return -this->m_params.y1 * pow(this->m_params.q, 2.) * (2. * this->m_params.q * X +1 ) * exp(this->m_params.q * X/(1+abs(X) * abs(this->m_params.q)))/ pow(1+ abs(X) * abs(this->m_params.q),4); }
+    { return -this->m_params.y1 * pow(this->m_params.q, 2.) * (2. * this->m_params.q * X +1 ) * exp(this->m_params.q * X/(1+ sqrt( X * X + this->m_params.eps * this->m_params.eps) * abs(this->m_params.q)))/ pow(1+ sqrt( X * X + this->m_params.eps * this->m_params.eps) * abs(this->m_params.q),4); }
 };
 class KGBDefault : public KGB<KGBDefault>
 {
