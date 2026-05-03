@@ -32,9 +32,10 @@ enum
     C_Si2,
     c_Si3,
     c_zeta,
-    c_zeta2,
-    c_zeta3,
-    c_R_mag,
+    c_zeta_w
+    c_zeta2_w,
+    c_zeta3_w,
+    c_R_mag_w,
     NUM_DIAGNOSTIC_VARS
 };
 
@@ -51,8 +52,8 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "rho_GB",   "Si1",    "Si2,
     "Si3",
 
-    "zeta",  "zeta2",  "zeta3"
-    "R_mag"
+    "zeta",  "zeta_w",  "zeta2_w",
+    "zeta3_w", "R_mag"
 
     };
 }
