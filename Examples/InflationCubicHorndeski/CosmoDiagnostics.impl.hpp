@@ -13,7 +13,7 @@
 
 template <class theory_t>
 template <class data_t>
-void CosmoDiagnostics<matter_t>::compute(Cell<data_t> current_cell) const
+void CosmoDiagnostics<theory_t>::compute(Cell<data_t> current_cell) const
 {
     // Load local vars and calculate derivs
     const auto vars = current_cell.template load_vars<Vars>();
@@ -32,14 +32,34 @@ void CosmoDiagnostics<matter_t>::compute(Cell<data_t> current_cell) const
     data_t S_scaled;
     data_t K_scaled;
     data_t a;
+    const data_t ln_chi       = log(vars.chi);
+    const data_t ln_chi_bg    = log(m_params.chi_background);  
+    const data_t delta_ln_chi = ln_chi - ln_chi_bg;
 
+    const data_t zeta         = -0.5 * delta_ln_chi;
+
+    Tensor<1, data_t> d_ln_gamma;
+    FOR(i) { d_ln_gamma[i] = -3.0 * d1.chi[i] / vars.chi; }
+    const data_t d0_ln_gamma = -2.0 * vars.K;
+    const data_t d0_phi = vars.lapse * vars.Pi;
+    Tensor<1, data_t> d_phi;
+    FOR(i) { d_phi[i] = d1.phi[i]; }
+    data_t R_sq = 0.0;
+    Tensor<1, data_t> R_vec;
+    FOR(i)
+    {
+        R_vec[i] = -d_ln_gamma[i] / 6.0
+                 + (d0_ln_gamma / (d0_phi + 1e-30)) * d_phi[i] / 6.0;
+        R_sq += R_vec[i] * R_vec[i];
+    }
+    const data_t R_mag = sqrt(R_sq);
+    const data_t zeta2 = zeta * zeta;
+    const data_t zeta3 = zeta * zeta * zeta;
     // Energy Momentum Tensor
     const auto rho_and_Si =
         theory_t.compute_rho_and_Si(vars, d1, d2, coords);
     const auto Sij_TF_and_S =
-        theory_t.compute_Sij_TF_and_S(vars, d1, d2,
-                                       /*advec=*/vars, // advec not used here
-                                       coords);
+        theory_t.compute_Sij_TF_and_S(vars, d1, d2, vars,coords);
     const auto all_rhos =
         theory_t.compute_all_rhos(vars, d1, d2, coords);
 
@@ -67,6 +87,10 @@ void CosmoDiagnostics<matter_t>::compute(Cell<data_t> current_cell) const
     current_cell.store_vars(rho_g2_scaled, c_rho_g2_scaled);
     current_cell.store_vars(rho_g3,        c_rho_g3);
     current_cell.store_vars(rho_g3_scaled, c_rho_g3_scaled);
+    current_cell.store_vars(zeta,            c_zeta);
+    current_cell.store_vars(zeta2,           c_zeta2);
+    current_cell.store_vars(zeta3,           c_zeta3);
+    current_cell.store_vars(R_mag,           c_R_mag);
 }
 
 #endif /* COSMODIAGNOSTICS_IMPL_HPP_ */
