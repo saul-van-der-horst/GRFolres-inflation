@@ -478,5 +478,64 @@ makeCouplingAndPotential(const std::string &model_name,
     else
         throw std::invalid_argument("Unknown model: '" + model_name + "'");
 }
+class CouplingAndPotentialAdapter
+{
+  public:
+    const ICouplingAndPotential &m_iface;
 
+    CouplingAndPotentialAdapter(const ICouplingAndPotential &iface)
+        : m_iface(iface) {}
+
+    template <class data_t>
+    ALWAYS_INLINE data_t V(const data_t phi, const data_t X) const
+    { return m_iface.V(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t dV_dphi(const data_t phi, const data_t X) const
+    { return m_iface.dV_dphi(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t G2(const data_t phi, const data_t X) const
+    { return m_iface.G2(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t dG2_dphi(const data_t phi, const data_t X) const
+    { return m_iface.dG2_dphi(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t dG2_dX(const data_t phi, const data_t X) const
+    { return m_iface.dG2_dX(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G2_dXX(const data_t phi, const data_t X) const
+    { return m_iface.d2G2_dXX(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G2_dXphi(const data_t phi, const data_t X) const
+    { return m_iface.d2G2_dXphi(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t G3(const data_t phi, const data_t X) const
+    { return m_iface.G3(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t dG3_dphi(const data_t phi, const data_t X) const
+    { return m_iface.dG3_dphi(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t dG3_dX(const data_t phi, const data_t X) const
+    { return m_iface.dG3_dX(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G3_dXX(const data_t phi, const data_t X) const
+    { return m_iface.d2G3_dXX(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G3_dXphi(const data_t phi, const data_t X) const
+    { return m_iface.d2G3_dXphi(phi, X); }
+
+    template <class data_t>
+    ALWAYS_INLINE data_t d2G3_dphiphi(const data_t phi, const data_t X) const
+    { return m_iface.d2G3_dphiphi(phi, X); }
+};
 #endif /* COUPLINGANDPOTENTIAL_HPP_ */
