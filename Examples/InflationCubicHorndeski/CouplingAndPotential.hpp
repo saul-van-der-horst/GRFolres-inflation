@@ -404,6 +404,21 @@ struct ICouplingAndPotential
     virtual double d2G3_dXX     (double phi, double X) const = 0;
     virtual double d2G3_dXphi   (double phi, double X) const = 0;
     virtual double d2G3_dphiphi (double phi, double X) const = 0;
+
+    virtual simd<double> V            (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> dV_dphi      (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> G2           (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> dG2_dphi     (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> dG2_dX       (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> d2G2_dXX     (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> d2G2_dXphi   (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> G3           (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> dG3_dphi     (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> dG3_dX       (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> d2G3_dXX     (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> d2G3_dXphi   (simd<double> phi, simd<double> X) const = 0;
+    virtual simd<double> d2G3_dphiphi (simd<double> phi, simd<double> X) const = 0;
+
 };
 
 template <class Model>
@@ -425,6 +440,21 @@ struct ModelWrapper : public ICouplingAndPotential
     double d2G3_dXX     (double phi, double X) const override { return m_model.d2G3_dXX(phi, X); }
     double d2G3_dXphi   (double phi, double X) const override { return m_model.d2G3_dXphi(phi, X); }
     double d2G3_dphiphi (double phi, double X) const override { return m_model.d2G3_dphiphi(phi, X); }
+
+    simd<double> V            (simd<double> phi, simd<double> X) const override { return m_model.V(phi, X); }
+    simd<double> dV_dphi      (simd<double> phi, simd<double> X) const override { return m_model.dV_dphi(phi, X); }
+    simd<double> G2           (simd<double> phi, simd<double> X) const override { return m_model.G2(phi, X); }
+    simd<double> dG2_dphi     (simd<double> phi, simd<double> X) const override { return m_model.dG2_dphi(phi, X); }
+    simd<double> dG2_dX       (simd<double> phi, simd<double> X) const override { return m_model.dG2_dX(phi, X); }
+    simd<double> d2G2_dXX     (simd<double> phi, simd<double> X) const override { return m_model.d2G2_dXX(phi, X); }
+    simd<double> d2G2_dXphi   (simd<double> phi, simd<double> X) const override { return m_model.d2G2_dXphi(phi, X); }
+    simd<double> G3           (simd<double> phi, simd<double> X) const override { return m_model.G3(phi, X); }
+    simd<double> dG3_dphi     (simd<double> phi, simd<double> X) const override { return m_model.dG3_dphi(phi, X); }
+    simd<double> dG3_dX       (simd<double> phi, simd<double> X) const override { return m_model.dG3_dX(phi, X); }
+    simd<double> d2G3_dXX     (simd<double> phi, simd<double> X) const override { return m_model.d2G3_dXX(phi, X); }
+    simd<double> d2G3_dXphi   (simd<double> phi, simd<double> X) const override { return m_model.d2G3_dXphi(phi, X); }
+    simd<double> d2G3_dphiphi (simd<double> phi, simd<double> X) const override { return m_model.d2G3_dphiphi(phi, X); }
+
 };
 
 inline std::unique_ptr<ICouplingAndPotential>
