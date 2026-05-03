@@ -53,7 +53,7 @@ void CosmoLevel::initialData()
     // First set everything to zero then initial conditions for scalar field -
     // Set initial condition of inflaton, see details in Potential.hpp and
     // InitialScalarData.hpp
-    double my_scalar_mass = m_p.potential_params.scalar_mass;
+   
    
     fillAllGhosts();
     // Note that the GammaCaluculator is not necessary since the data is
