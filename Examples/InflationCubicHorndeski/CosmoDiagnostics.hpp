@@ -20,7 +20,7 @@
 //! Calculates all relevant variables, which
 //! are stored as diagnostics
 
-template <class matter_t>
+template <class theory_t>
 class CosmoDiagnostics // public MatterConstraints<matter_t>
 {
   public:
@@ -41,7 +41,7 @@ class CosmoDiagnostics // public MatterConstraints<matter_t>
         void enum_mapping(mapping_function_t mapping_function)
         {
             CCZ4Vars<data_t>::enum_mapping(mapping_function);
-            MatterVars<data_t>::enum_mapping(mapping_function);
+            TheoryVars<data_t>::enum_mapping(mapping_function);
         }
     };
 
