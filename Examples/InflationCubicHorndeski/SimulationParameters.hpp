@@ -11,7 +11,7 @@
 #include "ModifiedGravitySimulationParametersBase.hpp"
 
 // Problem specific includes:
-#include "InitialScalarData.hpp"
+
 #include "CouplingAndPotential.hpp"
 #include "CubicHorndeski.hpp"
 #include "CosmoModifiedPunctureGauge.hpp"
