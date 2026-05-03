@@ -128,7 +128,7 @@ kappa2       = -0.1
 kappa3       = 1.0
 covariantZ4  = 1    # 0: keep kappa1; 1 [default]: replace kappa1 -> kappa1/lapse
 
-model_name = kgb-default
+model_name = kgb-dbin
 scalar_mass = 6e-6
 g2 = 0.1
 g3 = 10.0
