@@ -194,23 +194,23 @@ void CubicHorndeski<coupling_and_potential_t>::compute_useful_quantities(
     ////////////////////////////////////////////////////////////////////////
     // Functions G2 & G3 and derivatives
 
-    quantities.V = this->my_coupling_and_potential->V(vars.phi, X);
-    quantities.g2 = this->my_coupling_and_potential->G2(vars.phi, X);
+    quantities.V = this->my_coupling_and_potential.V(vars.phi, X);
+    quantities.g2 = this->my_coupling_and_potential.G2(vars.phi, X);
 
-    quantities.dV_dphi = this->my_coupling_and_potential->dV_dphi(vars.phi, X);
-    quantities.dg2_dphi = this->my_coupling_and_potential->dG2_dphi(vars.phi, X);
-    quantities.dg3_dphi = this->my_coupling_and_potential->dG3_dphi(vars.phi, X);
-    quantities.dg2_dX = this->my_coupling_and_potential->dG2_dX(vars.phi, X);
-    quantities.dg3_dX = this->my_coupling_and_potential->dG3_dX(vars.phi, X);
+    quantities.dV_dphi = this->my_coupling_and_potential.dV_dphi(vars.phi, X);
+    quantities.dg2_dphi = this->my_coupling_and_potential.dG2_dphi(vars.phi, X);
+    quantities.dg3_dphi = this->my_coupling_and_potential.dG3_dphi(vars.phi, X);
+    quantities.dg2_dX = this->my_coupling_and_potential.dG2_dX(vars.phi, X);
+    quantities.dg3_dX = this->my_coupling_and_potential.dG3_dX(vars.phi, X);
 
-    quantities.d2g2_dXX = this->my_coupling_and_potential->d2G2_dXX(vars.phi, X);
+    quantities.d2g2_dXX = this->my_coupling_and_potential.d2G2_dXX(vars.phi, X);
     quantities.d2g2_dXphi =
-        this->my_coupling_and_potential->d2G2_dXphi(vars.phi, X);
-    quantities.d2g3_dXX = this->my_coupling_and_potential->d2G3_dXX(vars.phi, X);
+        this->my_coupling_and_potential.d2G2_dXphi(vars.phi, X);
+    quantities.d2g3_dXX = this->my_coupling_and_potential.d2G3_dXX(vars.phi, X);
     quantities.d2g3_dXphi =
-        this->my_coupling_and_potential->d2G3_dXphi(vars.phi, X);
+        this->my_coupling_and_potential.d2G3_dXphi(vars.phi, X);
     quantities.d2g3_dphiphi =
-        this->my_coupling_and_potential->d2G3_dphiphi(vars.phi, X);
+        this->my_coupling_and_potential.d2G3_dphiphi(vars.phi, X);
 
     ////////////////////////////////////////////////////////////////////////
     // tau auxiliary variables
