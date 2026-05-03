@@ -55,6 +55,9 @@ void CosmoDiagnostics<theory_t>::compute(Cell<data_t> current_cell) const
     const data_t R_mag = sqrt(R_sq);
     const data_t zeta2 = zeta * zeta;
     const data_t zeta3 = zeta * zeta * zeta;
+    const data_t zeta_w  = zeta  * sqrt_gamma;
+    const data_t zeta2_w = zeta2 * sqrt_gamma;
+    const data_t zeta3_w = zeta3 * sqrt_gamma;
     // Energy Momentum Tensor
     const auto rho_and_Si =
         theory_t.compute_rho_and_Si(vars, d1, d2, coords);
@@ -88,8 +91,9 @@ void CosmoDiagnostics<theory_t>::compute(Cell<data_t> current_cell) const
     current_cell.store_vars(rho_g3,        c_rho_g3);
     current_cell.store_vars(rho_g3_scaled, c_rho_g3_scaled);
     current_cell.store_vars(zeta,            c_zeta);
-    current_cell.store_vars(zeta2,           c_zeta2);
-    current_cell.store_vars(zeta3,           c_zeta3);
+    current_cell.store_vars(zeta_w,            c_zeta_w);
+    current_cell.store_vars(zeta2_w,           c_zeta2_w);
+    current_cell.store_vars(zeta3_w,           c_zeta3_w);
     current_cell.store_vars(R_mag,           c_R_mag);
 }
 
