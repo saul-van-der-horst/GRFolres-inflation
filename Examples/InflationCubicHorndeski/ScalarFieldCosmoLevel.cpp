@@ -209,13 +209,15 @@ void CosmoLevel::specificPostTimeStep()
                                  chi_background);
             BoxLoops::loop(cosmo_diag_pass2, m_state_new, m_state_diagnostics,
                            EXCLUDE_GHOST_CELLS);
-            const double zeta_sum  = amr_diag.sum(c_zeta)  / phys_vol;
-            const double zeta2_sum = amr_diag.sum(c_zeta2) / phys_vol;
-            const double zeta3_sum = amr_diag.sum(c_zeta3) / phys_vol;
-            const double zeta_mean   = zeta_sum;
-            const double variance    = zeta2_sum - zeta_mean * zeta_mean;
-            const double third_central = zeta3_sum
-                                       - 3.0 * zeta_mean * zeta2_sum
+            fillAllGhosts();
+            AMRReductions<VariableType::diagnostic> amr_diag2(m_cosmo_amr);
+            const double zeta_mean  = amr_diag2.sum(c_zeta_w)  / phys_vol;
+            const double zeta2_mean = amr_diag2.sum(c_zeta2_w) / phys_vol;
+            const double zeta3_mean = amr_diag2.sum(c_zeta3_w) / phys_vol;
+            
+            const double variance    = zeta2_mran - zeta_mean * zeta_mean;
+            const double third_central = zeta3_mean
+                                       - 3.0 * zeta_mean * zeta2_mean
                                        + 2.0 * zeta_mean * zeta_mean * zeta_mean;
             const double skewness = (variance > 1e-30)
                                     ? third_central / std::pow(variance, 1.5)
