@@ -8,7 +8,7 @@
 
 #include "CCZ4Geometry.hpp"
 #include "Coordinates.hpp"
-#include "DefaultCouplingAndPotential.hpp"
+#include "CouplingAndPotential.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "ModifiedCCZ4RHS.hpp"
 #include "Tensor.hpp"
@@ -60,7 +60,7 @@ class CubicHorndeski
         Tensor<1, data_t> tau_ij_dot_dphi;
         data_t tau_ij_dot_dphi2;
     };
-     CubicHorndeski(const ICouplingAndPotential* a_coupling_and_potential)
+     CubicHorndeski(const coupling_and_potential_t* a_coupling_and_potential)
     : my_coupling_and_potential(a_coupling_and_potential)
      {
      }
@@ -169,7 +169,7 @@ class CubicHorndeski
         const; //!< the value of the coordinates
 
   protected:
-    const ICouplingAndPotential* my_coupling_and_potential;
+    const coupling_and_potential_t* my_coupling_and_potential;
 };
 
 #include "CubicHorndeski.impl.hpp"
