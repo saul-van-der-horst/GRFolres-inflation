@@ -37,7 +37,7 @@
      \sa ModifiedCCZ4RHS(), ModifiedGravityConstraints()
 */
 
-template <class coupling_and_potential_t = DefaultCouplingAndPotential>
+template <class coupling_and_potential_t = CouplingAndPotentialAdapter>
 class CubicHorndeski
 {
   public:
@@ -60,7 +60,7 @@ class CubicHorndeski
         Tensor<1, data_t> tau_ij_dot_dphi;
         data_t tau_ij_dot_dphi2;
     };
-     CubicHorndeski(const coupling_and_potential_t* a_coupling_and_potential)
+     CubicHorndeski(const coupling_and_potential_t a_coupling_and_potential)
     : my_coupling_and_potential(a_coupling_and_potential)
      {
      }
@@ -169,7 +169,7 @@ class CubicHorndeski
         const; //!< the value of the coordinates
 
   protected:
-    const coupling_and_potential_t* my_coupling_and_potential;
+    const coupling_and_potential_t my_coupling_and_potential;
 };
 
 #include "CubicHorndeski.impl.hpp"
