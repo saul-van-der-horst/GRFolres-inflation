@@ -256,7 +256,7 @@ void CosmoLevel::postRestart()
         BoxLoops::loop(ModifiedGravityConstraints<CubicHorndeskiWithCouplingAndPotential>(
                 cubic_horndeski, m_dx, m_p.center, m_p.G_Newton, c_Ham,
                 Interval(c_Mom1, c_Mom3), c_Ham_abs_sum,
-                Interval(c_Mom_abs_sum, c_Mom_abs_sum)),
+                Interval(c_Mom_abs_sum1, c_Mom_abs_sum3)),
             m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
         CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential> cosmo_diagnostics(
             cubic_horndeski, m_dx, m_p.G_Newton);
