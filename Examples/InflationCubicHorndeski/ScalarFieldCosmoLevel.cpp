@@ -201,6 +201,26 @@ void CosmoLevel::specificPostTimeStep()
                 m_cosmo_amr);
 
             double chi_mean = amr_reductions_evolution.sum(c_chi) / phys_vol;
+            double chi_background = chi_mean;
+            m_cosmo_amr.set_chi_mean(chi_background);
+
+            CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>>
+                cosmo_diag_pass2(cubic_horndeski, m_dx, m_p.G_Newton,
+                                 chi_background);
+            BoxLoops::loop(cosmo_diag_pass2, m_state_new, m_state_diagnostics,
+                           EXCLUDE_GHOST_CELLS);
+            const double zeta_sum  = amr_diag.sum(c_zeta)  / phys_vol;
+            const double zeta2_sum = amr_diag.sum(c_zeta2) / phys_vol;
+            const double zeta3_sum = amr_diag.sum(c_zeta3) / phys_vol;
+            const double zeta_mean   = zeta_sum;
+            const double variance    = zeta2_sum - zeta_mean * zeta_mean;
+            const double third_central = zeta3_sum
+                                       - 3.0 * zeta_mean * zeta2_sum
+                                       + 2.0 * zeta_mean * zeta_mean * zeta_mean;
+            const double skewness = (variance > 1e-30)
+                                    ? third_central / std::pow(variance, 1.5)
+                                    : 0.0;
+            const double sigma_zeta = std::sqrt(std::max(variance, 0.0));
 
             // Write output file
             SmallDataIO data_out_file(m_p.data_path + "data_out", m_dt, m_time,
@@ -210,11 +230,12 @@ void CosmoLevel::specificPostTimeStep()
             if (first_step)
             {
                 data_out_file.write_header_line(
-                    {"L^2_Ham", "L^2_Mom", "<chi>", "<rho>", "<K>"});
+                    {"L^2_Ham", "L^2_Mom", "<chi>", "<rho>", "<K>", "<zeta>", "sigma_zeta", "skewness"});
             }
             data_out_file.write_time_data_line({L2_Ham, L2_Mom, chi_mean,
                                                 m_cosmo_amr.get_rho_mean(),
-                                                m_cosmo_amr.get_K_mean()});
+                                                m_cosmo_amr.get_K_mean(), zeta_mean, 
+                                                sigma_zeta, zeta3_sum, skewness});
 
             // Use AMR Interpolator and do lineout data extraction
             // set up an interpolator
