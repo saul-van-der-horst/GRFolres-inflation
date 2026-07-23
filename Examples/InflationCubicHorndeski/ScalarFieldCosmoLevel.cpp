@@ -161,6 +161,7 @@ void CosmoLevel::specificPostTimeStep()
     int min_level = 0;
     bool calculate_diagnostics = at_level_timestep_multiple(min_level);
     bool first_step = (m_time == 0.);
+    CH_TIME("InflationCubicHorndeskiLevel::specificPostTimeStep");
 
     // No need to evaluate the diagnostics more frequently than every coarse
     // timestep, but must happen on every level (not just level zero or data
@@ -237,8 +238,8 @@ void CosmoLevel::specificPostTimeStep()
             data_out_file.write_time_data_line({L2_Ham, L2_Mom, chi_mean,
                                                 m_cosmo_amr.get_rho_mean(),
                                                 m_cosmo_amr.get_K_mean(), zeta_mean, 
-                                                sigma_zeta, zeta3_sum, skewness});
-
+                                                sigma_zeta, zeta3_mean, skewness});
+            
             // Use AMR Interpolator and do lineout data extraction
             // set up an interpolator
             // pass the boundary params so that we can use symmetries if
@@ -261,6 +262,55 @@ void CosmoLevel::specificPostTimeStep()
                                             m_time);
             rho_extraction.execute_query(&interpolator,
                                          m_p.data_path + "rho_lineout");
+        }
+    }
+      if (m_p.activate_extraction == 1 || m_p.activate_scalar_extraction == 1)
+    {
+        
+        if (calculate_weyl)
+        {
+            // Populate the Weyl Scalar values on the grid
+            fillAllGhosts();
+             CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
+            CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
+            CosmoModifiedPunctureGauge cosmo_modified_puncture_gauge(
+                m_p.modified_ccz4_params);
+            ModifiedGravityWeyl4<CubicHorndeskiWithCouplingAndPotential,
+                                 CosmoModifiedPunctureGauge, FourthOrderDerivatives>
+                weyl4(cubic_horndeski, m_p.modified_ccz4_params,
+                      cosmo_modified_puncture_gauge,
+                      m_p.extraction_params.extraction_center, m_dx, m_p.sigma,
+                      CCZ4RHS<>::USE_CCZ4);
+            // CCZ4 is required since this code only works in this
+            // formulation
+            BoxLoops::loop(weyl4, m_state_new, m_state_diagnostics,
+                           EXCLUDE_GHOST_CELLS);
+            // Do the extraction on the min extraction level
+            if (m_level == min_level)
+            {
+                CH_TIME("WeylExtraction");
+                // Now refresh the interpolator and do the interpolation
+                // fill ghosts manually to minimise communication
+                bool fill_ghosts = false;
+                m_cosmo_amr.m_interpolator->refresh(fill_ghosts);
+                m_cosmo_amr.fill_multilevel_ghosts(
+                    VariableType::diagnostic, Interval(c_Weyl4_Re, c_Weyl4_Im),
+                    min_level);
+                if (m_p.activate_extraction)
+                {
+                    WeylExtraction weyl_extraction(m_p.extraction_params, m_dt,
+                                                   m_time, first_step,
+                                                   m_restart_time);
+                    weyl_extraction.execute_query(m_bh_amr.m_interpolator);
+                }
+                if (m_p.activate_scalar_extraction)
+                {
+                    ScalarExtraction phi_extraction(
+                        m_p.scalar_extraction_params, m_dt, m_time, first_step,
+                        m_restart_time);
+                    phi_extraction.execute_query(m_cosmo_amr.m_interpolator);
+                }
+            }
         }
     }
 }
