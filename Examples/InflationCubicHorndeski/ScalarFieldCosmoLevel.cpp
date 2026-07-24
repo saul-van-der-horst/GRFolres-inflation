@@ -90,10 +90,10 @@ void CosmoLevel::specificEvalRHS(GRLevelData &a_soln,
                    a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
     // Calculate ModifiedCCZ4 right hand side with theory_t = CubicHorndeski
-    CouplingAndPotential coupling_and_potential(
-        m_p.coupling_and_potential_params);
-    CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(
-        coupling_and_potential);
+    CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
+
+    CubicHorndeski<CouplingAndPotentialAdapter>
+        cubic_horndeski(adapter);
     CosmoModifiedPunctureGauge cosmo_modified_puncture_gauge(m_p.modified_ccz4_params);
     cosmo_modified_puncture_gauge.set_K_mean(m_cosmo_amr.get_K_mean());
     if (m_p.max_spatial_derivative_order == 4)
@@ -158,7 +158,7 @@ void CosmoLevel::computeTaggingCriterion(
 
 void CosmoLevel::specificPostTimeStep()
 {
-    int min_level = 0;
+    int min_level = m_p.extraction_params.min_extraction_level();
     bool calculate_diagnostics = at_level_timestep_multiple(min_level);
     bool first_step = (m_time == 0.);
     CH_TIME("InflationCubicHorndeskiLevel::specificPostTimeStep");
@@ -216,7 +216,7 @@ void CosmoLevel::specificPostTimeStep()
             const double zeta2_mean = amr_diag2.sum(c_zeta2_w) / phys_vol;
             const double zeta3_mean = amr_diag2.sum(c_zeta3_w) / phys_vol;
             
-            const double variance    = zeta2_mran - zeta_mean * zeta_mean;
+            const double variance    = zeta2_mean - zeta_mean * zeta_mean;
             const double third_central = zeta3_mean
                                        - 3.0 * zeta_mean * zeta2_mean
                                        + 2.0 * zeta_mean * zeta_mean * zeta_mean;
@@ -233,7 +233,7 @@ void CosmoLevel::specificPostTimeStep()
             if (first_step)
             {
                 data_out_file.write_header_line(
-                    {"L^2_Ham", "L^2_Mom", "<chi>", "<rho>", "<K>", "<zeta>", "sigma_zeta", "skewness"});
+                    {"L^2_Ham", "L^2_Mom", "<chi>", "<rho>", "<K>", "<zeta>", "sigma_zeta","zeta3_mean", "skewness"});
             }
             data_out_file.write_time_data_line({L2_Ham, L2_Mom, chi_mean,
                                                 m_cosmo_amr.get_rho_mean(),
@@ -266,7 +266,7 @@ void CosmoLevel::specificPostTimeStep()
     }
       if (m_p.activate_extraction == 1 || m_p.activate_scalar_extraction == 1)
     {
-        
+        bool calculate_weyl = at_level_timestep_multiple(min_level);
         if (calculate_weyl)
         {
             // Populate the Weyl Scalar values on the grid
@@ -275,7 +275,8 @@ void CosmoLevel::specificPostTimeStep()
             CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
             CosmoModifiedPunctureGauge cosmo_modified_puncture_gauge(
                 m_p.modified_ccz4_params);
-            ModifiedGravityWeyl4<CubicHorndeskiWithCouplingAndPotential,
+            cosmo_modified_puncture_gauge.set_K_mean(m_cosmo_amr.get_K_mean());
+            ModifiedGravityWeyl4< CubicHorndeski<CouplingAndPotentialAdapter>,
                                  CosmoModifiedPunctureGauge, FourthOrderDerivatives>
                 weyl4(cubic_horndeski, m_p.modified_ccz4_params,
                       cosmo_modified_puncture_gauge,
@@ -301,7 +302,7 @@ void CosmoLevel::specificPostTimeStep()
                     WeylExtraction weyl_extraction(m_p.extraction_params, m_dt,
                                                    m_time, first_step,
                                                    m_restart_time);
-                    weyl_extraction.execute_query(m_bh_amr.m_interpolator);
+                    weyl_extraction.execute_query(m_cosmo_amr.m_interpolator);
                 }
                 if (m_p.activate_scalar_extraction)
                 {
@@ -408,7 +409,7 @@ void CosmoLevel::prePlotLevel()
     CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
     BoxLoops::loop(
         ModifiedGravityConstraints<CubicHorndeski<CouplingAndPotentialAdapter>>(
-            cubic_horndeski, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom1, c_Mom3)),
+            cubic_horndeski, m_dx,m_p.center, m_p.G_Newton, c_Ham, Interval(c_Mom1, c_Mom3)),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
     CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>> cosmo_diagnostics(
         cubic_horndeski, m_dx, m_p.G_Newton);
