@@ -55,7 +55,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "Si3",
 
     "zeta",  "zeta_w",  "zeta2_w",
-    "zeta3_w", "R_mag",
+    "zeta3_w", "R_mag_w",
 
     "Weyl4_Re","Weyl4_Im"
     };
