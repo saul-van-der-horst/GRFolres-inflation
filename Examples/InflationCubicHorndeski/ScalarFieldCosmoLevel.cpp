@@ -62,18 +62,19 @@ void CosmoLevel::initialData()
                    EXCLUDE_GHOST_CELLS);
 
     
-    CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
-    CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
-    
+    CouplingAndPotential coupling_and_potential(
+            m_p.coupling_and_potential_params);
+    CubicHorndeskiWithCouplingAndPotential cubic_horndeski(
+            coupling_and_potential);    
     // Calculate constraints and some diagnostics as we need it in tagging
     // criterion
-   BoxLoops::loop(
-    ModifiedGravityConstraints<CubicHorndeski<CouplingAndPotentialAdapter>>(
-        cubic_horndeski, m_dx, m_p.center, m_p.G_Newton, c_Ham,
-        Interval(c_Mom1, c_Mom3), c_Ham_abs_sum,
-        Interval(c_Mom_abs_sum1, c_Mom_abs_sum3)),
-    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-    CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>> cosmo_diagnostics(
+    BoxLoops::loop(
+     ModifiedGravityConstraints<CubicHorndeskiWithCouplingAndPotential>(
+         cubic_horndeski, m_dx, m_p.center, m_p.G_Newton, c_Ham,
+         Interval(c_Mom1, c_Mom3), c_Ham_abs_sum,
+         Interval(c_Mom_abs_sum1, c_Mom_abs_sum3)),
+     m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential> cosmo_diagnostics(
         cubic_horndeski, m_dx, m_p.G_Newton);
     BoxLoops::loop(cosmo_diagnostics, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
@@ -90,15 +91,15 @@ void CosmoLevel::specificEvalRHS(GRLevelData &a_soln,
                    a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
     // Calculate ModifiedCCZ4 right hand side with theory_t = CubicHorndeski
-    CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
-
-    CubicHorndeski<CouplingAndPotentialAdapter>
-        cubic_horndeski(adapter);
+    CouplingAndPotential coupling_and_potential(
+        m_p.coupling_and_potential_params);
+    CubicHorndeskiWithCouplingAndPotential cubic_horndeski(
+        coupling_and_potential);
     CosmoModifiedPunctureGauge cosmo_modified_puncture_gauge(m_p.modified_ccz4_params);
     cosmo_modified_puncture_gauge.set_K_mean(m_cosmo_amr.get_K_mean());
     if (m_p.max_spatial_derivative_order == 4)
     {
-        ModifiedCCZ4RHS<CubicHorndeski<CouplingAndPotentialAdapter>,
+        ModifiedCCZ4RHS<CubicHorndeskiWithCouplingAndPotential,
                         CosmoModifiedPunctureGauge, FourthOrderDerivatives>
             my_ccz4_theory(cubic_horndeski, m_p.modified_ccz4_params,
                            cosmo_modified_puncture_gauge, m_dx, m_p.sigma, m_p.center,
@@ -108,7 +109,7 @@ void CosmoLevel::specificEvalRHS(GRLevelData &a_soln,
     }
     else if (m_p.max_spatial_derivative_order == 6)
     {
-        ModifiedCCZ4RHS<CubicHorndeski<CouplingAndPotentialAdapter>,
+        ModifiedCCZ4RHS<CubicHorndeskiWithCouplingAndPotential,
                         CosmoModifiedPunctureGauge, SixthOrderDerivatives>
             my_ccz4_theory(cubic_horndeski, m_p.modified_ccz4_params,
                            cosmo_modified_puncture_gauge, m_dx, m_p.sigma, m_p.center,
@@ -130,15 +131,17 @@ void CosmoLevel::specificUpdateODE(GRLevelData &a_soln,
 void CosmoLevel::preTagCells()
 {
      fillAllGhosts();
-    CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
-    CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
+    CouplingAndPotential coupling_and_potential(
+        m_p.coupling_and_potential_params);
+    CubicHorndeskiWithCouplingAndPotential cubic_horndeski(
+        coupling_and_potential);
     BoxLoops::loop(
-    ModifiedGravityConstraints<CubicHorndeski<CouplingAndPotentialAdapter>>(
+    ModifiedGravityConstraints<CubicHorndeskiWithCouplingAndPotential>(
         cubic_horndeski, m_dx, m_p.center, m_p.G_Newton, c_Ham,
         Interval(c_Mom1, c_Mom3), c_Ham_abs_sum,
         Interval(c_Mom_abs_sum1, c_Mom_abs_sum3)),
     m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-    CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>> cosmo_diagnostics(
+    CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential> cosmo_diagnostics(
         cubic_horndeski, m_dx, m_p.G_Newton);
     BoxLoops::loop(cosmo_diagnostics, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
@@ -170,14 +173,16 @@ void CosmoLevel::specificPostTimeStep()
     if (calculate_diagnostics)
     {
         fillAllGhosts();
-        CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
-        CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
-        BoxLoops::loop(ModifiedGravityConstraints<CubicHorndeski<CouplingAndPotentialAdapter>>(
+        CouplingAndPotential coupling_and_potential(
+         m_p.coupling_and_potential_params);
+        CubicHorndeskiWithCouplingAndPotential cubic_horndeski(
+         coupling_and_potential);
+        BoxLoops::loop(ModifiedGravityConstraints<CubicHorndeskiWithCouplingAndPotential>(
             cubic_horndeski, m_dx, m_p.center, m_p.G_Newton, c_Ham,
             Interval(c_Mom1, c_Mom3), c_Ham_abs_sum,
             Interval(c_Mom_abs_sum1, c_Mom_abs_sum3)),
     m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>> cosmo_diagnostics(
+        CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential> cosmo_diagnostics(
             cubic_horndeski, m_dx, m_p.G_Newton);
         BoxLoops::loop(cosmo_diagnostics, m_state_new, m_state_diagnostics,
                        EXCLUDE_GHOST_CELLS);
@@ -205,7 +210,7 @@ void CosmoLevel::specificPostTimeStep()
             double chi_background = chi_mean;
             m_cosmo_amr.set_chi_mean(chi_background);
 
-            CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>>
+            CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential>
                 cosmo_diag_pass2(cubic_horndeski, m_dx, m_p.G_Newton,
                                  chi_background);
             BoxLoops::loop(cosmo_diag_pass2, m_state_new, m_state_diagnostics,
@@ -271,12 +276,14 @@ void CosmoLevel::specificPostTimeStep()
         {
             // Populate the Weyl Scalar values on the grid
             fillAllGhosts();
-             CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
-            CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
+           CouplingAndPotential coupling_and_potential(
+                m_p.coupling_and_potential_params);
+           CubicHorndeskiWithCouplingAndPotential cubic_horndeski(
+                coupling_and_potential);
             CosmoModifiedPunctureGauge cosmo_modified_puncture_gauge(
                 m_p.modified_ccz4_params);
             cosmo_modified_puncture_gauge.set_K_mean(m_cosmo_amr.get_K_mean());
-            ModifiedGravityWeyl4< CubicHorndeski<CouplingAndPotentialAdapter>,
+            ModifiedGravityWeyl4< CubicHorndeskiWithCouplingAndPotential,
                                  CosmoModifiedPunctureGauge, FourthOrderDerivatives>
                 weyl4(cubic_horndeski, m_p.modified_ccz4_params,
                       cosmo_modified_puncture_gauge,
@@ -322,17 +329,19 @@ void CosmoLevel::postRestart()
     if (m_time == 0.0)
     {
         fillAllGhosts();
-        CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
-        CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
+        CouplingAndPotential coupling_and_potential(
+            m_p.coupling_and_potential_params);
+        CubicHorndeskiWithCouplingAndPotential cubic_horndeski(
+            coupling_and_potential)
 
         // Calculate constraints and some diagnostics as we need it in tagging
         // criterion
-        BoxLoops::loop(ModifiedGravityConstraints<CubicHorndeski<CouplingAndPotentialAdapter>>(
+        BoxLoops::loop(ModifiedGravityConstraints<CubicHorndeskiWithCouplingAndPotential>(
                 cubic_horndeski, m_dx, m_p.center, m_p.G_Newton, c_Ham,
                 Interval(c_Mom1, c_Mom3), c_Ham_abs_sum,
                 Interval(c_Mom_abs_sum1, c_Mom_abs_sum3)),
             m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>> cosmo_diagnostics(
+        CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential> cosmo_diagnostics(
             cubic_horndeski, m_dx, m_p.G_Newton);
         BoxLoops::loop(cosmo_diagnostics, m_state_new, m_state_diagnostics,
                        EXCLUDE_GHOST_CELLS);
@@ -405,13 +414,15 @@ void CosmoLevel::postRestart()
 void CosmoLevel::prePlotLevel()
 {
     fillAllGhosts();
-    CouplingAndPotentialAdapter adapter(*m_p.matter_params.coupling);
-    CubicHorndeski<CouplingAndPotentialAdapter> cubic_horndeski(adapter);
+    CouplingAndPotential coupling_and_potential(
+        m_p.coupling_and_potential_params);
+    CubicHorndeskiWithCouplingAndPotential cubic_horndeski(
+        coupling_and_potential);
     BoxLoops::loop(
-        ModifiedGravityConstraints<CubicHorndeski<CouplingAndPotentialAdapter>>(
+        ModifiedGravityConstraints<CubicHorndeskiWithCouplingAndPotential>(
             cubic_horndeski, m_dx,m_p.center, m_p.G_Newton, c_Ham, Interval(c_Mom1, c_Mom3)),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-    CosmoDiagnostics<CubicHorndeski<CouplingAndPotentialAdapter>> cosmo_diagnostics(
+    CosmoDiagnostics<CubicHorndeskiWithCouplingAndPotential> cosmo_diagnostics(
         cubic_horndeski, m_dx, m_p.G_Newton);
     BoxLoops::loop(cosmo_diagnostics, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
