@@ -80,12 +80,12 @@ void CosmoDiagnostics<theory_t>::compute(Cell<data_t> current_cell) const
     
     const data_t zeta2 = zeta  * zeta;
     const data_t zeta3 = zeta2 * zeta;
-
+    
     const data_t chi_w   = vars.chi * sqrt_gamma;  
     const data_t zeta_w  = zeta     * sqrt_gamma;
     const data_t zeta2_w = zeta2    * sqrt_gamma;
     const data_t zeta3_w = zeta3    * sqrt_gamma;
-
+    const data_t R_mag_w = R_mag    * sqrt_gamma;
     
     current_cell.store_vars(sqrt_gamma,      c_sqrt_gamma);
     current_cell.store_vars(rho,             c_rho);
@@ -104,6 +104,7 @@ void CosmoDiagnostics<theory_t>::compute(Cell<data_t> current_cell) const
     current_cell.store_vars(zeta2_w,         c_zeta2_w);
     current_cell.store_vars(zeta3_w,         c_zeta3_w);
     current_cell.store_vars(R_mag,           c_R_mag);
+    current_cell.store_vars(R_mag_w,           c_R_mag_w);
 }
 
 #endif /* COSMODIAGNOSTICS_IMPL_HPP_ */
