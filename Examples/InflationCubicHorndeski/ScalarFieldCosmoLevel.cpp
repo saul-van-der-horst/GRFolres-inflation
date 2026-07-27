@@ -201,7 +201,7 @@ void CosmoLevel::specificPostTimeStep()
             m_cosmo_amr.set_S_mean(amr_reductions_diagnostic.sum(c_S_scaled) /
                                    phys_vol);
             m_cosmo_amr.set_K_mean(K_total / phys_vol);
-
+            const double R_mag_mean = amr_reductions_diagnostic.sum(c_R_mag_w) / phys_vol;
             // AMRReductions for evolution variables
             AMRReductions<VariableType::evolution> amr_reductions_evolution(
                 m_cosmo_amr);
@@ -243,7 +243,7 @@ void CosmoLevel::specificPostTimeStep()
             data_out_file.write_time_data_line({L2_Ham, L2_Mom, chi_mean,
                                                 m_cosmo_amr.get_rho_mean(),
                                                 m_cosmo_amr.get_K_mean(), zeta_mean, 
-                                                sigma_zeta, zeta3_mean, skewness});
+                                                sigma_zeta, zeta3_mean, skewness, R_mag_mean});
             
             // Use AMR Interpolator and do lineout data extraction
             // set up an interpolator
